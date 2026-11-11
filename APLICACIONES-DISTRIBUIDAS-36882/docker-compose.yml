@@ -28,3 +28,12 @@ services:
       - "8080:8080"
     depends_on:
       - app
+
+  scheduler:
+    build: .
+    volumes:
+      - .:/var/www/html
+    command: php artisan schedule:work
+    depends_on:
+      - db
+      - reverb

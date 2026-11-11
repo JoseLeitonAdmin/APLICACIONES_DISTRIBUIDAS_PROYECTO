@@ -12,6 +12,8 @@ class Subasta extends Model
         'precio_inicial',
         'precio_actual',
         'termina_en',
+        'lider',
+        'cerrada',
     ];
 }
 

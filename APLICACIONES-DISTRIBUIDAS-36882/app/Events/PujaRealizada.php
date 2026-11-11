@@ -13,6 +13,7 @@ class PujaRealizada implements ShouldBroadcastNow
     public function __construct(
         public int $subastaId,
         public int $monto,
+        public string $lider,
     ) {}
 
     public function broadcastOn(): Channel

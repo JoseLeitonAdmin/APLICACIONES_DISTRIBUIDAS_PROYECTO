@@ -1,0 +1,30 @@
+name: APLICACIONES-DISTRIBUIDAS-36882
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: APLICACIONES_DISTRIBUIDAS
+      POSTGRES_USER: ADMIN
+      POSTGRES_PASSWORD: SECRET
+
+  app:
+    build: .
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    command: php artisan serve --host=0.0.0.0 --port=8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+  reverb:
+    build: .
+    volumes:
+      - .:/var/www/html
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080 --debug
+    ports:
+      - "8080:8080"
+    depends_on:
+      - app

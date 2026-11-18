@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subasta;
-use App\Events\PujaRealizada;
+use App\Services\PujaService;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class SubastaController extends Controller
 {
@@ -13,25 +14,17 @@ class SubastaController extends Controller
         return view('subastas.index', ['subastas' => Subasta::orderBy('id')->get()]);
     }
 
-    public function pujar(Request $request, Subasta $subasta)
-{
-    $nombre = trim($request->input('nombre'));
-    $monto = (int) $request->input('monto');
+    public function pujar(Request $request, Subasta $subasta, PujaService $servicio)
+    {
+        $nombre = trim($request->input('nombre'));
+        $monto = (int) $request->input('monto');
 
-    if ($subasta->cerrada) {
-        return back()->with('error', 'La subasta ya está cerrada');
+        try {
+            $servicio->pujar($subasta, $nombre, $monto);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back();
     }
-
-    if ($monto <= $subasta->precio_actual) {
-        return back()->with('error', "La puja debe superar {$subasta->precio_actual}");
-    }
-
-    $subasta->precio_actual = $monto;
-    $subasta->lider = $nombre;
-    $subasta->save();
-
-    PujaRealizada::dispatch($subasta->id, $monto, $nombre);
-
-    return back();
-}
 }

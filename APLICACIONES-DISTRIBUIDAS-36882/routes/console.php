@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\PujaService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -8,13 +9,11 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Prueba 1: Comando para enviar mensajes en vivo a /sala
 Artisan::command('sala:enviar {texto}', function (string $texto) {
     App\Events\MensajeSala::dispatch($texto);
     $this->info('Mensaje enviado al canal sala');
 });
 
-// Prueba 2: Comando para cerrar subastas vencidas
 Artisan::command('subastas:cerrar', function () {
     $vencidas = App\Models\Subasta::where('cerrada', false)
         ->where('termina_en', '<=', now())
@@ -30,5 +29,9 @@ Artisan::command('subastas:cerrar', function () {
     $this->info("Subastas cerradas: {$vencidas->count()}");
 });
 
-// Programación de tareas: Ejecuta el cierre automáticamente cada 10 segundos
+Artisan::command('pujar {subasta} {nombre} {monto}', function (PujaService $servicio, int $subasta, string $nombre, int $monto) {
+    $servicio->pujar(App\Models\Subasta::findOrFail($subasta), $nombre, $monto);
+    $this->info('Puja registrada');
+});
+
 Schedule::command('subastas:cerrar')->everyTenSeconds();
